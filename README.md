@@ -1,4 +1,3 @@
-
 # APIcast Example Policy
 
 This policy is an example how to make custom policies for APIcast.
@@ -15,6 +14,14 @@ oc new-app -f openshift.yml --param AMP_RELEASE=2.5.0
 The template creates new ImageStream for images containing this policy.
 Then it creates two BuildConfigs: one for building an image to apicast-policy ImageStream
 and second one for creating new APIcast image copying just necessary code from that previous image.
+
+after run commane go to menu "Builds > Builds", You will found the 2 new Builds config.
+  1). apicast-requestid-policy
+  2). apicast-custom-policies
+ 
+First click run "apicast-requestid-policy" to compile lua and create temp image.
+Secound click run "apicast-custom-policies" to copy policy to api-cast image and openshift will tags new api-case to lasted version.
+
 
 ## lua script life cycle
 
