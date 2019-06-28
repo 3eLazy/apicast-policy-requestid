@@ -27,7 +27,7 @@ objects:
         name: apicast-policy:example
     source:
       git:
-        uri: https://github.com/tinhan/apicast-requestid-policy.git
+        uri: https://git.ocp-test.local/mbix/apicast-requestid-policy.git
         ref: 'master'
       type: Git
     strategy:
@@ -88,4 +88,4 @@ objects:
 parameters:
 - name: AMP_RELEASE
   required: true
-  description: AMP Version (eg. 2.2.0-GA)
+  description: AMP Version (eg. 2.5.0-GA)
