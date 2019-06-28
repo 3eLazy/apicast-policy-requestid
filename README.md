@@ -16,8 +16,8 @@ Then it creates two BuildConfigs: one for building an image to apicast-policy Im
 and second one for creating new APIcast image copying just necessary code from that previous image.
 
 after run commane go to menu "Builds > Builds", You will found the 2 new Builds config.
-*   1). apicast-requestid-policy
-*   2). apicast-custom-policies
+*   apicast-requestid-policy
+*   apicast-custom-policies
 
 
 First click run "apicast-requestid-policy" to compile lua and create temp image.
@@ -67,7 +67,3 @@ Secound click run "apicast-custom-policies" to copy policy to api-cast image and
     -- use for example require('resty.balancer.round_robin').call to do load balancing
     end
 
-
-# License
-
-MIT
