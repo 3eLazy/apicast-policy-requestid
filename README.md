@@ -1,4 +1,3 @@
-[![CircleCI](https://circleci.com/gh/3scale/apicast-example-policy.svg?style=svg)](https://circleci.com/gh/3scale/apicast-example-policy)
 
 # APIcast Example Policy
 
