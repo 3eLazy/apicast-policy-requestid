@@ -8,7 +8,7 @@ This policy is an example how to make custom policies for APIcast.
 To install this on OpenShift you can use provided template:
 
 ```shell
-oc new-app -f openshift.yml --param AMP_RELEASE=2.5.0
+oc new-app -f apicast-requestid-policy.yml --param AMP_RELEASE=2.5.0
 ```
 
 The template creates new ImageStream for images containing this policy.
