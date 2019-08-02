@@ -10,6 +10,10 @@
       "gen_request_header": {
         "description": "Http Header for Gennerate request id.",
         "type": "string"
+      },
+      "header_to_keep": {
+        "description": "X-* Http Header That need to keep in response header. if have many use (,) as comma spread",
+        "type": "string"
       }
     }
   }
