@@ -5,18 +5,6 @@ local new = _M.new
 local ngx_var_new_header = ''
 local ngx_var_header_to_keep = ''
 
-function mystw(ss,st,sn)
-    return string.sub(ss,sn,string.len(st))==st
-end
-
-function mysplit(ss, sp)
-    local t={}
-    for str in string.gmatch(ss, "([^"..sp.."]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
 function _M.new(config)
     local self = new(config)
     local header_setval = config.gen_request_header
@@ -59,7 +47,7 @@ function _M:header_filter()
 
     for k, v in pairs(rs_h) do
         local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
-        if mystw(str, "x-", 2) or mystw(str, "camel", 5) then
+        if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
             local keep_h = 0
             if str == "x-transaction-id" or str == "x-correlation-id" then
                 keep_h = 1
