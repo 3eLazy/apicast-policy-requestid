@@ -24,11 +24,13 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: apicast-policy:example
+        name: apicast-policy:1.0
     source:
       git:
         uri: https://git.ocp-test.local/mbix/apicast-requestid-policy.git
         ref: 'master'
+      sourceSecret:
+        name: gitssh
       type: Git
     strategy:
       type: Source
@@ -36,6 +38,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: 'amp-apicast:${AMP_RELEASE}'
+          namespace: openshift
 
 - apiVersion: v1
   kind: BuildConfig
@@ -62,7 +65,7 @@ objects:
       images:
         - from:
             kind: ImageStreamTag
-            name: 'apicast-policy:example'
+            name: 'apicast-policy:1.0'
           paths:
             # copy policy source code into the new image
             - destinationDir: policies
@@ -80,6 +83,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: 'amp-apicast:${AMP_RELEASE}'
+          namespace: openshift
       type: Docker
     triggers:
       - type: ConfigChange
@@ -88,4 +92,4 @@ objects:
 parameters:
 - name: AMP_RELEASE
   required: true
-  description: AMP Version (eg. 2.5.0-GA)
+  description: AMP Version (eg. 2.5.0)
