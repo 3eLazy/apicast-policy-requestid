@@ -53,18 +53,10 @@ function _M:rewrite()
 
 end
 
-function _M:body_filter()
-    local resp = ""
-    local header_val = self.ngx_var_new_header
-    local rq_uid = ngx.req.get_headers()[header_val]
+function _M:header_filter()
     local header_to_keep = self.ngx_var_header_to_keep
-
-    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
-    if ngx.arg[2] then
-      resp = ngx.ctx.buffered
-    end
-
     local rs_h = ngx.resp.get_headers()
+
     for k, v in pairs(rs_h) do
         local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
         if mystw(str, "x-", 2) or mystw(str, "camel", 5) then
@@ -73,7 +65,8 @@ function _M:body_filter()
                 keep_h = 1
             else
                 for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
-                    if str == htk then
+                    local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
+                    if str == strhtk then
                         keep_h = 1
                         break
                     end
@@ -86,6 +79,17 @@ function _M:body_filter()
         if str == "app_id" or str == "app_key" or str == "user_key" then
             ngx.header[k] = nil
         end
+    end
+end
+
+function _M:body_filter()
+    local resp = ""
+    local header_val = self.ngx_var_new_header
+    local rq_uid = ngx.req.get_headers()[header_val]
+
+    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
+    if ngx.arg[2] then
+      resp = ngx.ctx.buffered
     end
 
     ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
