@@ -49,7 +49,7 @@ function _M:header_filter()
         local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
         if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
             local keep_h = 0
-            if str == "x-transaction-id" or str == "x-correlation-id" then
+            if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
                 keep_h = 1
             else
                 for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
