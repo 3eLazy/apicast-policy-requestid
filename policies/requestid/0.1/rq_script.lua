@@ -1,11 +1,16 @@
+
 local _M = require('apicast.policy').new('Gen UUID', '0.1')
 local new = _M.new
 
 local ngx_var_new_header = ''
+local ngx_var_header_to_keep = ''
 
 function _M.new(config)
     local self = new(config)
     local header_setval = config.gen_request_header
+    local header_to_keep = config.header_to_keep
+    -- ngx.log(0, 'get vakue fron header', header_setval)
+    self.ngx_var_header_to_keep = header_to_keep
 
     if header_setval == nil then
         self.ngx_var_new_header = 'breadcrumbId'
@@ -34,6 +39,35 @@ function _M:rewrite()
     ngx.req.set_header(header_val, rq_uuid)
     ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
+end
+
+function _M:header_filter()
+    local header_to_keep = self.ngx_var_header_to_keep
+    local rs_h = ngx.resp.get_headers()
+
+    for k, v in pairs(rs_h) do
+        local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
+        if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
+            local keep_h = 0
+            if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
+                keep_h = 1
+            else
+                for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
+                    local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
+                    if str == strhtk then
+                        keep_h = 1
+                        break
+                    end
+                end
+            end
+            if keep_h ~= 1 then
+                ngx.header[k] = nil
+            end
+        end
+        if str == "app_id" or str == "app_key" or str == "user_key" then
+            ngx.header[k] = nil
+        end
+    end
 end
 
 function _M:body_filter()
