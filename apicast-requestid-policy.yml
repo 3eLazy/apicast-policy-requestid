@@ -60,7 +60,7 @@ objects:
       to:
         kind: ImageStreamTag
         name: 'amp-apicast:${AMP_RELEASE}'
-    postCommit
+    postCommit:
       args:
         - '--test'
         - '--lazy'
