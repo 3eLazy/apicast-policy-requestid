@@ -25,7 +25,7 @@ objects:
     annotations:
     labels:
       app: apicast
-    name: apicast-requestid-policy
+    name: 'apicast-requestid-policy-${AMP_RELEASE}'
   spec:
     output:
       to:
@@ -53,7 +53,7 @@ objects:
     annotations:
     labels:
       app: apicast
-    name: apicast-custom-policies
+    name: 'apicast-custom-policies-${AMP_RELEASE}'
   spec:
     nodeSelector: null
     output:
