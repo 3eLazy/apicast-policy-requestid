@@ -1,5 +1,5 @@
 
-local _M = require('apicast.policy').new('Gen UUID', '1.0')
+local _M = require('apicast.policy').new('Gen UUID', '0.1')
 local new = _M.new
 
 local ngx_var_new_header = ''
@@ -8,8 +8,9 @@ local ngx_var_header_to_keep = ''
 function _M.new(config)
     local self = new(config)
     local header_setval = config.gen_request_header
-    local header_to_keep = config.header_to_keep
     -- ngx.log(0, 'get vakue fron header', header_setval)
+
+    local header_to_keep = config.list_header_to_keep
     self.ngx_var_header_to_keep = header_to_keep
 
     if header_setval == nil then
@@ -17,7 +18,9 @@ function _M.new(config)
     else
         self.ngx_var_new_header = header_setval
     end
-    -- ngx.log(0, 'get vakue fron header', ngx_var_new_header)
+
+    ngx.log(0, 'set rquuid to header', ngx_var_new_header)
+    ngx.log(0, 'list to keep header', ngx_var_header_to_keep)
 
     return self
 end
@@ -34,7 +37,6 @@ function _M:rewrite()
         return string.format('%x', v) end)
 
     local header_val = self.ngx_var_new_header
-
     local rq_uuid = rq_dt .. "-" .. rq_uuid_rand
     ngx.req.set_header(header_val, rq_uuid)
     ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
@@ -45,10 +47,9 @@ function _M:body_filter()
     local resp = ""
     local header_val = self.ngx_var_new_header
     local rq_uid = ngx.req.get_headers()[header_val]
-
     ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
     if ngx.arg[2] then
-      resp = ngx.ctx.buffered
+        resp = ngx.ctx.buffered
     end
 
     local header_to_keep = self.ngx_var_header_to_keep
@@ -90,7 +91,9 @@ function _M:body_filter()
     end
 
     ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
-  
+
 end
+
+
 
 return _M
