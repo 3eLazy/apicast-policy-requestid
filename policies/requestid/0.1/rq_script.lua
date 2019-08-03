@@ -41,37 +41,6 @@ function _M:rewrite()
 
 end
 
-function _M:header_filter()
-    local header_to_keep = self.ngx_var_header_to_keep
-    local rs_h = ngx.resp.get_headers()
-
-    for k, v in pairs(rs_h) do
-        local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
-        if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
-            local keep_h = 0
-            if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
-                keep_h = 1
-            else
-                if header_to_keep ~= nil or header_to_keep ~= "" then
-                    for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
-                        local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
-                        if str == strhtk then
-                            keep_h = 1
-                            break
-                        end
-                    end
-                end
-            end
-            if keep_h ~= 1 then
-                ngx.header[k] = nil
-            end
-        end
-        if str == "app_id" or str == "app_key" or str == "user_key" then
-            ngx.header[k] = nil
-        end
-    end
-end
-
 function _M:body_filter()
     local resp = ""
     local header_val = self.ngx_var_new_header
@@ -82,6 +51,44 @@ function _M:body_filter()
       resp = ngx.ctx.buffered
     end
 
+    local header_to_keep = self.ngx_var_header_to_keep
+    local rs_h = ngx.resp.get_headers()
+    ngx.log(0, 'header to keep = ', header_to_keep)
+    ngx.log(0, 'response header = ', rs_h)
+    for k, v in pairs(rs_h) do
+        ngx.log(0, 'header = ', k)
+        local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
+        ngx.log(0, 'header lower = ', str)
+        if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
+            local keep_h = 0
+            if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
+                keep_h = 1
+                ngx.log(0, 'match header = ', k)
+            else
+                if header_to_keep ~= nil or header_to_keep ~= "" then
+                    for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
+                        ngx.log(0, 'extra keep header = ', htk)
+                        local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
+                        ngx.log(0, 'extra keep header lower = ', strhtk)
+                        if str == strhtk then
+                            keep_h = 1
+                            ngx.log(0, 'match header = ', k)
+                            break
+                        end
+                    end
+                end
+            end
+            if keep_h ~= 1 then
+                ngx.header[k] = nil
+                gx.log(0, 'header set to nil = ', k)
+            end
+        end
+        if str == "app_id" or str == "app_key" or str == "user_key" then
+            ngx.header[k] = nil
+            gx.log(0, 'header set to nil = ', k)
+        end
+    end
+    
     ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
   
 end
