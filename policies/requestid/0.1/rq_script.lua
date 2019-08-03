@@ -39,14 +39,15 @@ function _M:rewrite()
     local header_val = self.ngx_var_new_header
     local rq_uuid = rq_dt .. "-" .. rq_uuid_rand
     ngx.req.set_header(header_val, rq_uuid)
+    ngx.header['app_key'] = nil
     ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
 
 function _M:header_filter()
-    local rs_h = ngx.resp.get_headers()
-    ngx.log(0, 'list of response headers = ', table.tostring(rs_h))
-
+    local config = configuration or {}
+    local set_header = config.set_header or {}
+    local rs_h = ngx.req.get_headers()
     local header_to_keep = self.ngx_var_header_to_keep
     ngx.log(0, 'header to keep = ', header_to_keep)
     for k, v in pairs(rs_h) do
