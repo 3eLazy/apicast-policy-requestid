@@ -52,11 +52,13 @@ function _M:header_filter()
             if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
                 keep_h = 1
             else
-                for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
-                    local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
-                    if str == strhtk then
-                        keep_h = 1
-                        break
+                if header_to_keep ~= nil or header_to_keep ~= "" then
+                    for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
+                        local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
+                        if str == strhtk then
+                            keep_h = 1
+                            break
+                        end
                     end
                 end
             end
