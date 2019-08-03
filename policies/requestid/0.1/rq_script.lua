@@ -4,7 +4,6 @@ local new = _M.new
 
 local ngx_var_new_header = ''
 local ngx_var_header_to_keep = ''
-local ngx_var_resp_headers = {}
 
 function _M.new(config)
     local self = new(config)
@@ -45,24 +44,14 @@ function _M:rewrite()
 end
 
 function _M:header_filter()
+    local config = configuration or {}
+    local get_header = config.get_header or {}
     local rs_h = ngx.resp.get_headers()
-    self.ngx_var_resp_headers = rs_h or {}
-    ngx.log(0, 'list of response headers', ngx_var_resp_headers)
-end
-
-function _M:body_filter()
-    local resp = ""
-    local header_val = self.ngx_var_new_header
-    local rq_uid = ngx.req.get_headers()[header_val]
-    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
-    if ngx.arg[2] then
-        resp = ngx.ctx.buffered
-    end
+    ngx.log(0, 'list of response headers', rs_h)
 
     local header_to_keep = self.ngx_var_header_to_keep
-    local resp_h = self.ngx_var_resp_headers
     ngx.log(0, 'header to keep = ', header_to_keep)
-    ngx.log(0, 'response header = ', resp_h)
+    ngx.log(0, 'response header = ', rs_h)
     for k, v in pairs(rs_h) do
         ngx.log(0, 'header = ', k)
         local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
@@ -95,6 +84,17 @@ function _M:body_filter()
             ngx.header[k] = nil
             gx.log(0, 'header set to nil = ', k)
         end
+    end
+    
+end
+
+function _M:body_filter()
+    local resp = ""
+    local header_val = self.ngx_var_new_header
+    local rq_uid = ngx.req.get_headers()[header_val]
+    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
+    if ngx.arg[2] then
+        resp = ngx.ctx.buffered
     end
 
     ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
