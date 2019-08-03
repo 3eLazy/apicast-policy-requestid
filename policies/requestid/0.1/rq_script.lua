@@ -1,4 +1,3 @@
-
 local _M = require('apicast.policy').new('Gen UUID', '0.1')
 local new = _M.new
 
@@ -45,7 +44,6 @@ end
 
 function _M:header_filter()
     local rs_h = ngx.resp.get_headers()
-    ngx.log(0, 'list of response headers = ', rs_h.tostring)
 
     local header_to_keep = self.ngx_var_header_to_keep
     ngx.log(0, 'header to keep = ', header_to_keep)
