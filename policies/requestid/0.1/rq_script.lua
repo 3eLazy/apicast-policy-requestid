@@ -4,6 +4,7 @@ local new = _M.new
 
 local ngx_var_new_header = ''
 local ngx_var_header_to_keep = ''
+local ngx_var_resp_headers = {}
 
 function _M.new(config)
     local self = new(config)
@@ -11,7 +12,7 @@ function _M.new(config)
     -- ngx.log(0, 'get vakue fron header', header_setval)
 
     local header_to_keep = config.list_header_to_keep
-    self.ngx_var_header_to_keep = header_to_keep
+    self.ngx_var_header_to_keep = header_to_keep or {}
 
     if header_setval == nil then
         self.ngx_var_new_header = 'breadcrumbId'
@@ -43,6 +44,12 @@ function _M:rewrite()
 
 end
 
+function _M:header_filter()
+    local rs_h = ngx.resp.get_headers()
+    self.ngx_var_resp_headers = rs_h or {}
+    ngx.log(0, 'list of response headers', ngx_var_resp_headers)
+end
+
 function _M:body_filter()
     local resp = ""
     local header_val = self.ngx_var_new_header
@@ -53,9 +60,9 @@ function _M:body_filter()
     end
 
     local header_to_keep = self.ngx_var_header_to_keep
-    local rs_h = ngx.resp.get_headers()
+    local resp_h = self.ngx_var_resp_headers
     ngx.log(0, 'header to keep = ', header_to_keep)
-    ngx.log(0, 'response header = ', rs_h)
+    ngx.log(0, 'response header = ', resp_h)
     for k, v in pairs(rs_h) do
         ngx.log(0, 'header = ', k)
         local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
