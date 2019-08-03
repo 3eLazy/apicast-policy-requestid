@@ -11,7 +11,7 @@ function _M.new(config)
     -- ngx.log(0, 'get vakue fron header', header_setval)
 
     local header_to_keep = config.list_header_to_keep
-    self.ngx_var_header_to_keep = header_to_keep
+    self.ngx_var_header_to_keep = header_to_keep or {}
 
     if header_setval == nil then
         self.ngx_var_new_header = 'breadcrumbId'
@@ -45,7 +45,7 @@ end
 
 function _M:header_filter()
     local rs_h = ngx.resp.get_headers()
-    ngx.log(0, 'list of response headers', rs_h.tostring)
+    ngx.log(0, 'list of response headers = ', rs_h.tostring() )
 
     local header_to_keep = self.ngx_var_header_to_keep
     ngx.log(0, 'header to keep = ', header_to_keep)
@@ -74,12 +74,12 @@ function _M:header_filter()
             end
             if keep_h ~= 1 then
                 ngx.header[k] = nil
-                gx.log(0, 'header set to nil = ', k)
+                ngx.log(0, 'header set to nil = ', k)
             end
         end
         if str == "app_id" or str == "app_key" or str == "user_key" then
             ngx.header[k] = nil
-            gx.log(0, 'header set to nil = ', k)
+            ngx.log(0, 'header set to nil = ', k)
         end
     end
 
