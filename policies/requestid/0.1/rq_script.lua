@@ -1,5 +1,5 @@
 
-local _M = require('apicast.policy').new('Gen UUID', '0.1')
+local _M = require('apicast.policy').new('Gen UUID', '1.0')
 local new = _M.new
 
 local ngx_var_new_header = ''
@@ -88,7 +88,7 @@ function _M:body_filter()
             gx.log(0, 'header set to nil = ', k)
         end
     end
-    
+
     ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
   
 end
