@@ -6,7 +6,7 @@ local _M = policy.new('Gen UUID', '0.1')
 local new = _M.new
 
 local to_header = ''
-local keep_headers = {}
+local keep_headers = ''
 
 local function set_request_header(header_name, value)
     ngx.req.set_header(header_name, value)
@@ -22,20 +22,13 @@ end
 
 -- Initialize the config so we do not have to check for nulls in the rest of
 -- the code.
-local function init_config(config)
-    local res = config or {}
-    res.to_header = res.to_header or ''
-    res.headers = res.headers or {}
-    return res
-end
 
 function _M.new(config)
     local self = new(config)
-    self.config = init_config(config)
 
-    local header_setval = config.to_header
-    local headers = config.headers
-    self.keep_headers = headers
+    local header_setval = config.to_header or {}
+    local headers_keep = config.keep_headers or {}
+    self.keep_headers = headers_keep
 
     ngx.log(ngx.DEBUG, 'Input header name for RqUUID = ', header_setval)
 
@@ -51,7 +44,7 @@ function _M.new(config)
     return self
 end
 
-function _M:rewrite(context)
+function _M:rewrite()
     -- This is here to avoid calling ngx.req.get_headers() in every command
     -- applied to the request headers.
     local random = math.random
@@ -71,9 +64,9 @@ function _M:rewrite(context)
 
 end
 
-function _M:header_filter(context)
+function _M:header_filter()
 
-    local headers = self.keep_headers
+    local headers_keep = self.keep_headers
     local rs_h, err = ngx.resp.get_headers()
     if err == "truncated" then
         -- one can choose to ignore or reject the current response here
@@ -94,10 +87,10 @@ function _M:header_filter(context)
                 if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
-                elseif headers ~= nil then
-                    for hk, hv in pairs(headers) do
-                        ngx.log(ngx.DEBUG, 'input keep header = ', hv)
-                        if k == string.lowwer(hv) then
+                elseif headers_keep ~= nil then
+                    for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
+                        ngx.log(ngx.DEBUG, 'input keep header = ', htk)
+                        if k == string.lowwer(htk) then
                             keep_h = '1'
                             ngx.log(ngx.DEBUG, 'keep header = ', k)
                             break
@@ -114,7 +107,7 @@ function _M:header_filter(context)
     end
 end
 
-function _M:body_filter(context)
+function _M:body_filter()
     local resp = ''
     local header_val = self.to_header
     local rq_uid = ngx.req.get_headers()[header_val]
