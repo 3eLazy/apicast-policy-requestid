@@ -59,8 +59,8 @@ function _M:header_filter()
         for k, v in pairs(rs_h) do
             ngx.log(ngx.DEBUG, 'header = ', k)
             xh = string.sub(k, 1, 2)
-            cmh = string.sub(str, 1, 5)
-            if k == "app_id" or str == "app_key" or str == "user_key" then
+            cmh = string.sub(k, 1, 5)
+            if k == "app_id" or k == "app_key" or k == "user_key" then
                 ngx.header[k] = nil
                 ngx.log(ngx.DEBUG, 'header set to nil = ', k)
             elseif xh == 'x-' or xh == 'X-' or cmh == 'camel' or cmh == 'Camel' then
