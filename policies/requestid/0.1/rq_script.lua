@@ -80,7 +80,7 @@ function _M:header_filter()
                 elseif header_to_keep ~= nil then
                     for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
                         ngx.log(ngx.DEBUG, 'input keep header = ', htk)
-                        if str == strhtk then
+                        if k == string.lower(htk) then
                             keep_h = '1'
                             ngx.log(ngx.DEBUG, 'keep header = ', k)
                             break
