@@ -1,22 +1,28 @@
+
 local _M = require('apicast.policy').new('Gen UUID', '0.1')
 local new = _M.new
 
 local ngx_var_new_header = ''
+local ngx_var_header_to_keep = ''
 
 function _M.new(config)
-  local self = new(config)
-  local header_setval = config.gen_request_header
-  ngx.log(0, 'get vakue fron header', header_setval)
+    local self = new(config)
+    local header_setval = config.gen_request_header
+    ngx.log(ngx.DEBUG, 'get vakue fron header', header_setval)
 
-  if header_setval == nil then
-    self.ngx_var_new_header = 'breadcrumbId'
-  else
-    self.ngx_var_new_header = header_setval
-  end
-  
-  ngx.log(0, 'get vakue fron header', ngx_var_new_header)
-  
-  return self
+    local header_to_keep = config.list_header_to_keep
+    self.ngx_var_header_to_keep = header_to_keep
+
+    if header_setval == nil then
+        self.ngx_var_new_header = 'breadcrumbId'
+    else
+        self.ngx_var_new_header = header_setval
+    end
+
+    ngx.log(ngx.DEBUG, 'set rquuid to header ', ngx_var_new_header)
+    ngx.log(ngx.DEBUG, 'list to keep header ', ngx_var_header_to_keep)
+
+    return self
 end
 
 function _M:rewrite()
@@ -38,17 +44,62 @@ function _M:rewrite()
 
 end
 
+function _M:header_filter()
+    local header_to_keep = self.ngx_var_header_to_keep
+    ngx.log(ngx.DEBUG, 'header to keep = ', header_to_keep)
+    local rs_h, err = ngx.resp.get_headers()
+
+    if err == "truncated" then
+        -- one can choose to ignore or reject the current response here
+        ngx.log(ngx.DEBUG, 'Cannot read response header')
+    else
+        for k, v in pairs(rs_h) do
+            ngx.log(ngx.DEBUG, 'header = ', k)
+            local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
+            ngx.log(ngx.DEBUG, 'header lower = ', str)
+            if string.sub(str, 1, 2) == "x-" or string.sub(str, 1, 5) == "camel" then
+                local keep_h = 0
+                if str == "x-transaction-id" or str == "x-correlation-id" or str == "x-salt-hex" then
+                    keep_h = 1
+                    ngx.log(ngx.DEBUG, 'match header = ', k)
+                else
+                    if header_to_keep ~= nil or header_to_keep ~= "" then
+                        for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
+                            ngx.log(ngx.DEBUG, 'extra keep header = ', htk)
+                            local strhtk = htk:gsub("%f[%a]%u+%f[%A]", string.lower)
+                            ngx.log(ngx.DEBUG, 'extra keep header lower = ', strhtk)
+                            if str == strhtk then
+                                keep_h = 1
+                                ngx.log(ngx.DEBUG, 'match header = ', k)
+                                break
+                            end
+                        end
+                    end
+                end
+                if keep_h ~= 1 then
+                    ngx.header[k] = nil
+                    ngx.log(ngx.DEBUG, 'header set to nil = ', k)
+                end
+            end
+            if str == "app_id" or str == "app_key" or str == "user_key" then
+                ngx.header[k] = nil
+                ngx.log(ngx.DEBUG, 'header set to nil = ', k)
+            end
+        end
+    end
+end
+
 function _M:body_filter()
     local resp = ""
     local header_val = self.ngx_var_new_header
     local rq_uid = ngx.req.get_headers()[header_val]
     ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
     if ngx.arg[2] then
-      resp = ngx.ctx.buffered
+        resp = ngx.ctx.buffered
     end
 
-    ngx.log(0, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
-  
+    ngx.log(ngx.NOTICE, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
+
 end
 
 
