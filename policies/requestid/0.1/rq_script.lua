@@ -4,8 +4,6 @@ local new = _M.new
 
 local ngx_var_new_header = ''
 local ngx_var_header_to_keep = ''
-local ngx_var_req_header = ''
-local ngx_var_resp_header = ''
 
 function _M.new(config)
     local self = new(config)
@@ -39,13 +37,8 @@ function _M:rewrite()
     local header_val = self.ngx_var_new_header
     local rq_uuid = rq_dt .. "-" .. rq_uuid_rand
     ngx.req.set_header(header_val, rq_uuid)
-    local rq_h = ngx.req.get_headers()
-    for k, v in pairs(rq_h) do
-        self.ngx_var_req_header = self.ngx_var_req_header..k.."="..v..", "
-    end
     ngx.header['app_key'] = nil
-    ngx.log(ngx.DEBUG, 'Request header ', ngx_var_req_header)
-    ngx.log(ngx.NOTICE, 'In coming request { { Header : [', ngx.var.req_header ,']}, { Body : ', ngx.var.request_body , ' } }')
+    ngx.log(ngx.NOTICE, 'In coming request { ',header_val,' : ', rq_uid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
 
@@ -97,16 +90,12 @@ function _M:body_filter()
                 if keep_h == '0' then
                     ngx.header[k] = nil
                     ngx.log(ngx.DEBUG, 'header set to nil = ', k)
-                else
-                    self.ngx_var_resp_header = self.ngx_var_resp_header..k.."="..v..", "
                 end
-            else
-                self.ngx_var_resp_header = self.ngx_var_resp_header..k.."="..v..", "
             end
         end
     end
 
-    ngx.log(ngx.NOTICE, 'Out going response {{ Header : [', ngx.var.req_header ,']}, { Body : ', resp , ' }}')
+    ngx.log(ngx.NOTICE, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
 
 end
 
