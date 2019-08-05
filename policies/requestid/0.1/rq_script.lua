@@ -6,7 +6,7 @@ local _M = policy.new('Gen UUID', '0.1')
 local new = _M.new
 
 local to_header = ''
-local headers = {}
+local keep_headers = {}
 
 local function set_request_header(header_name, value)
     ngx.req.set_header(header_name, value)
@@ -35,7 +35,7 @@ function _M.new(config)
 
     local header_setval = config.to_header
     local headers = config.headers
-    self.headers = headers
+    self.keep_headers = headers
 
     ngx.log(ngx.DEBUG, 'Input header name for RqUUID = ', header_setval)
 
@@ -45,8 +45,8 @@ function _M.new(config)
         self.to_header = header_setval
     end
 
-    ngx.log(ngx.DEBUG, 'set rquuid to header ', ngx_var_new_header)
-    ngx.log(ngx.DEBUG, 'list to keep header ', ngx_var_header_to_keep)
+    ngx.log(ngx.DEBUG, 'set rquuid to header ', to_header)
+    ngx.log(ngx.DEBUG, 'list to keep header ', keep_headers)
 
     return self
 end
@@ -62,7 +62,7 @@ function _M:rewrite(context)
         local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
         return string.format('%x', v) end)
 
-    local header_val = self.to_header
+    local header_val = ngx.to_header
     local rq_uuid = rq_dt .. "-" .. rq_uuid_rand
     set_request_header(header_val, rq_uuid)
     delete_request_header('app_key')
@@ -73,7 +73,7 @@ end
 
 function _M:header_filter(context)
 
-    local headers = self.headers
+    local headers = self.keep_headers
     local rs_h, err = ngx.resp.get_headers()
     if err == "truncated" then
         -- one can choose to ignore or reject the current response here
@@ -95,7 +95,7 @@ function _M:header_filter(context)
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
                 elseif headers ~= nil then
-                    for htk in headers do
+                    for htk in ipairs(headers) do
                         ngx.log(ngx.DEBUG, 'input keep header = ', htk)
                         if k == string.lowwer(htk) then
                             keep_h = '1'
@@ -128,4 +128,3 @@ function _M:body_filter(context)
 end
 
 return _M
-
