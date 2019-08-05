@@ -56,6 +56,7 @@ function _M:header_filter()
         local keep_h = '0'
         for k, v in pairs(rs_h) do
             ngx.log(ngx.DEBUG, 'header = ', k)
+            local str = k:gsub("%f[%a]%u+%f[%A]", string.lower)
             ngx.log(ngx.DEBUG, 'header lower = ', str)
 
             if str == "app_id" or str == "app_key" or str == "user_key" then
@@ -78,7 +79,7 @@ function _M:header_filter()
                         end
                     end
                 end
-                
+
                 if keep_h == '0' then
                     ngx.header[k] = nil
                     ngx.log(ngx.DEBUG, 'header set to nil = ', k)
