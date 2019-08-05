@@ -95,9 +95,9 @@ function _M:header_filter(context)
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
                 elseif headers ~= nil then
-                    for htk in ipairs(headers) do
-                        ngx.log(ngx.DEBUG, 'input keep header = ', htk)
-                        if k == string.lowwer(htk) then
+                    for hk, hv in pairs(headers) do
+                        ngx.log(ngx.DEBUG, 'input keep header = ', hv)
+                        if k == string.lowwer(hv) then
                             keep_h = '1'
                             ngx.log(ngx.DEBUG, 'keep header = ', k)
                             break
