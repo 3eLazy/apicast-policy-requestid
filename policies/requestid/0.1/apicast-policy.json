@@ -7,28 +7,15 @@
   "version": "0.1",
   "configuration": {
     "type": "object",
-    "definitions": {
-      "headers": {
-        "description": "List of headers to deleted",
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "header": {
-              "description": "Header to be deleted",
-              "type": "string"
-            }
-          },
-          "required": ["header"]
-        }
-      }
-    },
     "properties": {
       "to_header": {
         "description": "Header to store generated RqUUID.",
         "type": "string"
       },
-      "headers": { "$ref": "#/definitions/headers" }
+      "keep_headers": {
+        "description": "X-* Http Header That need to keep in response header. if have many use (,) as comma spread",
+        "type": "string"
+      }
     }
   }
 }
