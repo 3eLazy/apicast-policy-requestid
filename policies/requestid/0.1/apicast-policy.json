@@ -1,17 +1,18 @@
 {
   "$schema": "http://apicast.io/policy-v1/schema#manifest#",
-  "name": "Generate Request Id Policy",
-  "summary": "This is use for Gen UUID and set to Header and logs request and response payload.",
-  "description": "This policy will generate UUID and se to HTTP Header.",
+  "name": "Generate RqUUID and delete unsecured headers",
+  "summary": "This is use for Generate RqUUID.",
+  "description":
+  ["This policy allows Generate RqUUID and set it to request header, logs request and response payload. and delete all unsecured headers"],
   "version": "0.1",
   "configuration": {
     "type": "object",
     "properties": {
-      "gen_request_header": {
-        "description": "Http Header for Gennerate request id.",
+      "to_header": {
+        "description": "Header to store generated RqUUID.",
         "type": "string"
       },
-      "list_header_to_keep": {
+      "keep_headers": {
         "description": "X-* Http Header That need to keep in response header. if have many use (,) as comma spread",
         "type": "string"
       }
