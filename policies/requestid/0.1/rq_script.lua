@@ -68,7 +68,7 @@ function _M:header_filter()
             xh = string.sub(k, 1, 2)
             cmh = string.sub(k, 1, 5)
             -- app_id, app_key and user_key cannot remove from response header, it can remove on request only
-            if xh == 'x-' or cmh == 'camel' or 'forwarded' then
+            if xh == 'x-' or cmh == 'camel' or k == 'forwarded' then
                 keep_h = '0'
                 if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
                     keep_h = '1'
