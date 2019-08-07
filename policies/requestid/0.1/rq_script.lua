@@ -45,9 +45,11 @@ function _M:rewrite()
     self.t_rquuid = rq_uuid
     ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
+
+    local access_key = 'app_id='..ngx.req.get_header()['app_id']..'&app_key='..ngx.req.get_header()['app_key']
     ngx.req.clear_header('app_key')
     ngx.req.clear_header('user_key')
-    ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
+    ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Access: '..access_key..' }, { Body : ', ngx.var.request_body , ' } }')
 
 end
 
