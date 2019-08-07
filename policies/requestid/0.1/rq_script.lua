@@ -6,6 +6,7 @@ local new = _M.new
 
 local t_header = ''
 local k_headers = ''
+local t_rquuid = ''
 
 function _M.new(config)
     local self = new(config)
@@ -41,8 +42,11 @@ function _M:rewrite()
 
     local header_val = self.t_header
     local rq_uuid = rq_dt .. "-" .. rq_uuid_rand
+    self.t_rquuid = rq_uuid
+    ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
     ngx.req.clear_header('app_key')
+    ngx.req.clear_header('user_key')
     ngx.log(ngx.NOTICE, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
@@ -63,18 +67,9 @@ function _M:header_filter()
             ngx.log(ngx.DEBUG, 'header = ', k)
             xh = string.sub(k, 1, 2)
             cmh = string.sub(k, 1, 5)
-            if k == 'app_id' or k == 'app_key' or k == 'user_key' then
-                ngx.header[k] = nil
-                ngx.log(ngx.DEBUG, 'header set to nil = ', k)
-            elseif xh == 'x-' or xh == 'X-' or cmh == 'camel' or cmh == 'Camel' then
+            if xh == 'x-' or cmh == 'camel' or k == 'app_id' or k == 'app_key' or k == 'user_key' then
                 keep_h = '0'
-                if k == 'x-transaction-id' or k == 'X-Transaction-Id' then
-                    keep_h = '1'
-                    ngx.log(ngx.DEBUG, 'keep header = ', k)
-                elseif k == 'x-correlation-id' or k == 'X-Correlation-Id' then
-                    keep_h = '1'
-                    ngx.log(ngx.DEBUG, 'keep header = ', k)
-                elseif k == 'x-salt-hex' or k == 'X-Salt-Hex' then
+                if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
                 elseif header_to_keep ~= nil then
@@ -100,16 +95,14 @@ end
 function _M:body_filter()
     local resp = ""
     local header_val = self.t_header
-    local rq_uid = ngx.req.get_headers()[header_val]
+    local rq_uuid = self.t_rquuid
     ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
     if ngx.arg[2] then
         resp = ngx.ctx.buffered
     end
 
-    ngx.log(ngx.NOTICE, 'Out going response { ',header_val,' : ', rq_uid, ', { Body : ', resp , ' } }')
+    ngx.log(ngx.NOTICE, 'Out going response { ',header_val,' : ', rq_uuid, ', { Body : ', resp , ' } }')
 
 end
-
-
 
 return _M
