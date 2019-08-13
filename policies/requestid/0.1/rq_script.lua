@@ -46,10 +46,11 @@ function _M:rewrite()
     ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
 
-    local access_key = 'app_id='..ngx.req.get_headers()['app_id']..'&app_key='..ngx.req.get_headers()['app_key']
+    local access_key = 'app_id: '..ngx.req.get_headers()['app_id']..', app_key: '..ngx.req.get_headers()['app_key']
     ngx.req.clear_header('app_key')
     ngx.req.clear_header('user_key')
-    ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Access: '..access_key..' }, { Body : ', ngx.var.request_body , ' } }')
+    ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
+    ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
 
@@ -69,8 +70,8 @@ function _M:header_filter()
             ngx.log(ngx.DEBUG, 'header = ', k)
             xh = string.sub(k, 1, 2)
             cmh = string.sub(k, 1, 5)
-            -- app_id, app_key and user_key cannot remove from response header, it can remove on request only
-            if xh == 'x-' or cmh == 'camel' or k == 'forwarded' then
+            -- app_id and user_key cannot remove from header.
+            if xh == 'x-' or cmh == 'camel' or k == 'forwarded' or k == 'server' then
                 keep_h = '0'
                 if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
                     keep_h = '1'
@@ -92,7 +93,6 @@ function _M:header_filter()
                 end
             end
         end
-        ngx.header['server'] = 'Super quantum computer 1000 qbixs'
     end
 end
 
