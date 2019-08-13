@@ -45,6 +45,11 @@ objects:
           kind: ImageStreamTag
           name: 'amp-apicast:${AMP_RELEASE}'
           namespace: openshift
+        env:
+          - name: NO_PROXY
+            value: '*'
+          - name: no_proxy
+            value: '*'
     triggers:
       - type: ConfigChange
 - apiVersion: v1
@@ -91,6 +96,11 @@ objects:
           kind: ImageStreamTag
           name: 'amp-apicast:${AMP_RELEASE}'
           namespace: openshift
+        env:
+          - name: NO_PROXY
+            value: '*'
+          - name: no_proxy
+            value: '*'
       type: Docker
     triggers:
       - type: ConfigChange
