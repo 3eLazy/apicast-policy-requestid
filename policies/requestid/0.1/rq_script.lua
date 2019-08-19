@@ -67,6 +67,7 @@ function _M:rewrite()
         ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
         ngx.req.clear_header('user_key')
     end
+
     ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
