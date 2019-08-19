@@ -13,7 +13,11 @@ function _M.new(config)
 
     local header_setval = config.to_header
     local headers_keep = config.keep_headers
-    self.k_headers = headers_keep
+    if header_setval == nil then
+        self.k_headers = 'novalue'
+    else
+        self.k_headers = headers_keep
+    end
 
     ngx.log(ngx.DEBUG, 'Input header name for RqUUID = ', header_setval)
 
@@ -46,10 +50,24 @@ function _M:rewrite()
     ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
 
-    local access_key = 'app_id: '..ngx.req.get_headers()['app_id']..', app_key: '..ngx.req.get_headers()['app_key']
-    ngx.req.clear_header('app_key')
-    ngx.req.clear_header('user_key')
-    ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
+    local rq_app_id = ngx.req.get_headers()['app_id']
+    local rq_app_key = ngx.req.get_headers()['app_key']
+    local rq_user_key = ngx.req.get_headers()['user_key']
+    if rq_app_id ~= nil and rq_app_key ~= nil then
+        local access_key = 'app_id: '..rq_app_id..', app_key: '..rq_app_key
+        ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
+        if rq_app_key ~= nil then
+            ngx.req.clear_header('app_key')
+        end
+    else
+        ngx.log(ngx.DEBUG, 'Access Key is missing')
+    end
+    if rq_user_key ~= nil then
+        local access_key = 'user_key: '..rq_user_key
+        ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
+        ngx.req.clear_header('user_key')
+    end
+
     ngx.log(0, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
@@ -70,13 +88,13 @@ function _M:header_filter()
             ngx.log(ngx.DEBUG, 'header = ', k)
             xh = string.sub(k, 1, 2)
             cmh = string.sub(k, 1, 5)
-            -- app_id and user_key cannot remove from header.
-            if xh == 'x-' or cmh == 'camel' or k == 'forwarded' or k == 'server' then
+            -- app_id, app_key and user_key cannot remove from response header, it can remove on request only
+            if xh == 'x-' or cmh == 'camel' or k == 'forwarded' then
                 keep_h = '0'
                 if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
-                elseif header_to_keep ~= nil then
+                elseif header_to_keep ~= nil or header_to_keep ~= 'novalue' then
                     for htk in string.gmatch(header_to_keep, "([^"..",".."]+)") do
                         ngx.log(ngx.DEBUG, 'input keep header = ', htk)
                         if k == string.lower(htk) then
@@ -93,6 +111,7 @@ function _M:header_filter()
                 end
             end
         end
+        ngx.header['server'] = 'Unknown'
     end
 end
 
