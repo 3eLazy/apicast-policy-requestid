@@ -13,18 +13,17 @@ function _M.new(config)
 
     local header_setval = config.to_header
     local headers_keep = config.keep_headers
-    if header_setval == nil then
-        self.k_headers = 'novalue'
-    else
-        self.k_headers = headers_keep
-    end
-
-    ngx.log(ngx.DEBUG, 'Input header name for RqUUID = ', header_setval)
 
     if header_setval == nil then
         self.t_header = 'breadcrumbId'
     else
         self.t_header = header_setval
+    end
+
+    if headers_keep == nil then
+        self.k_headers = 'novalue'
+    else
+        self.k_headers = headers_keep
     end
 
     ngx.log(ngx.DEBUG, 'set rquuid to header ', t_header)
@@ -37,6 +36,9 @@ function _M:rewrite()
     local config = configuration or {}
     local set_header = config.set_header or {}
     local random = math.random
+
+    ngx.header['server'] = 'Unknown'
+
     local rq_time = ngx.req.start_time()
     local rq_dt = os.date('%Y%m%d%H%M%S', rq_time)
     local template ='xxxxxxxxxxxxyyxxxxxxxxxxxxxxyy'
@@ -49,16 +51,13 @@ function _M:rewrite()
     self.t_rquuid = rq_uuid
     ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
-
     local rq_app_id = ngx.req.get_headers()['app_id']
     local rq_app_key = ngx.req.get_headers()['app_key']
     local rq_user_key = ngx.req.get_headers()['user_key']
     if rq_app_id ~= nil and rq_app_key ~= nil then
         local access_key = 'app_id: '..rq_app_id..', app_key: '..rq_app_key
         ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
-        if rq_app_key ~= nil then
-            ngx.req.clear_header('app_key')
-        end
+        ngx.req.clear_header('app_key')
     else
         ngx.log(ngx.DEBUG, 'Access Key is missing')
     end
