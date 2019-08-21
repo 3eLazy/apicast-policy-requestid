@@ -67,7 +67,7 @@ function _M:rewrite()
         ngx.req.clear_header('user_key')
     end
 
-    ngx.log(ngx.INFO, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
+    ngx.log(ngx.NOTICE, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
 
 end
 
@@ -123,7 +123,7 @@ function _M:body_filter()
         resp = ngx.ctx.buffered
     end
 
-    ngx.log(ngx.INFO, 'Out going response { ',header_val,' : ', rq_uuid, ', { Body : ', resp , ' } }')
+    ngx.log(ngx.NOTICE, 'Out going response { ',header_val,' : ', rq_uuid, ', { Body : ', resp , ' } }')
 
 end
 
