@@ -66,7 +66,7 @@ function _M:rewrite()
     end
 
     ngx.log(ngx.WARN, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
-    ngx.header['server'] = 'Unknown'
+    ngx.header['Server'] = 'Unknown'
     ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 end
 
@@ -109,7 +109,7 @@ function _M:header_filter()
                 end
             end
         end
-        ngx.header['server'] = 'Unknown'
+        ngx.header['Server'] = 'Unknown'
         ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     end
 end
@@ -124,8 +124,6 @@ function _M:body_filter()
     end
 
     ngx.log(ngx.WARN, 'Out going response { ',header_val,' : ', rq_uuid, ', { Body : ', resp , ' } }')
-    ngx.header['server'] = 'Unknown'
-    ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 end
 
 return _M
