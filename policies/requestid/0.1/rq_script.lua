@@ -89,7 +89,7 @@ function _M:header_filter()
             -- app_id, app_key and user_key cannot remove from response header, it can remove on request only
             if xh == 'x-' or cmh == 'camel' or k == 'forwarded' then
                 keep_h = '0'
-                if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' then
+                if k == 'x-transaction-id' or k == 'x-correlation-id' or k == 'x-salt-hex' or k == 'x-content-type-options' or k == 'x-xss-protection' then
                     keep_h = '1'
                     ngx.log(ngx.DEBUG, 'keep header = ', k)
                 elseif header_to_keep ~= nil or header_to_keep ~= 'novalue' then
