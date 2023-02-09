@@ -137,11 +137,11 @@ function _M:body_filter()
     -- https://github.com/openresty/lua-nginx-module/blob/master/README.markdown#body_filter_by_lua
     local header_val = self.t_header
     local rq_uuid = self.t_rquuid
---     local resp_body = string.sub(ngx.arg[1], 1, 1000)
---     ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
---     if ngx.arg[2] then
---       resp_body = ngx.ctx.buffered
---     end
+    local resp_body = string.sub(ngx.arg[1], 1, 1000)
+    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
+    if ngx.arg[2] then
+        resp_body = ngx.ctx.buffered
+    end
     ngx.log(ngx.WARN, 'Out going response: {',header_val,':',rq_uuid,',{ Body:',ngx.var.resp_body,'}}')
 end
 
