@@ -1,5 +1,5 @@
 --- Gen RQUUID and remove Response Headers policy
-local _M = require('apicast.policy').new('gen UUID', '0.1')
+local _M = require('apicast.policy').new('requestid', '0.1')
 local new = _M.new
 
 local t_header = ''
