@@ -1,19 +1,18 @@
 {
   "$schema": "http://apicast.io/policy-v1/schema#manifest#",
   "name": "Generate RqUUID and delete unsecured headers",
-  "summary": "This is use for Generate RqUUID.",
-  "description":
-  ["This policy allows Generate RqUUID and set it to request header, logs request and response payload. and delete all unsecured headers"],
+  "summary": "This is use for Generate RqUUID",
+  "description": "This policy allows Generate RqUUID and set it to request header, logs request and response payload. and delete all unsecured headers",
   "version": "0.1",
   "configuration": {
     "type": "object",
     "properties": {
       "to_header": {
-        "description": "Header to store generated RqUUID.",
+        "description": "Header to store generated RqUUID, default is breadcrumbId",
         "type": "string"
       },
       "keep_headers": {
-        "description": "X-* Http Header That need to keep in response header. if have many use (,) as comma spread",
+        "description": "X-* Http Header That need to keep in response header. If have more, use comma (,) as spread",
         "type": "string"
       }
     }

@@ -1,7 +1,5 @@
 --- Gen RQUUID and remove Response Headers policy
-local policy = require('apicast.policy')
-local _M = policy.new('Gen UUID', '0.1')
-
+local _M = require('apicast.policy').new('gen UUID', '0.1')
 local new = _M.new
 
 local t_header = ''
@@ -32,7 +30,16 @@ function _M.new(config)
     return self
 end
 
+function _M:init()
+    -- do work when nginx master process starts
+end
+
+function _M:init_worker()
+    -- do work when nginx worker process is forked from master
+end
+
 function _M:rewrite()
+    -- change the request before it reaches upstream
     local config = configuration or {}
     local set_header = config.set_header or {}
     local random = math.random
@@ -52,25 +59,36 @@ function _M:rewrite()
     local rq_app_id = ngx.req.get_headers()['app_id']
     local rq_app_key = ngx.req.get_headers()['app_key']
     local rq_user_key = ngx.req.get_headers()['user_key']
+    local rq_bearer = ngx.req.get_headers()['Authorization']
     if rq_app_id ~= nil and rq_app_key ~= nil then
-        local access_key = 'app_id: '..rq_app_id..', app_key: '..rq_app_key
-        ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
         ngx.req.clear_header('app_key')
-    else
-        ngx.log(ngx.DEBUG, 'Access Key is missing')
     end
     if rq_user_key ~= nil then
-        local access_key = 'user_key: '..rq_user_key
-        ngx.log(ngx.DEBUG, 'Access Key is { '..access_key..' }')
         ngx.req.clear_header('user_key')
     end
+    if rq_app_id ~= nil and rq_app_key ~= nil then
+        ngx.req.clear_header('app_key')
+    end
 
-    ngx.log(ngx.WARN, 'In coming request { ', header_val, ' : ', rq_uuid, ', { Body : ', ngx.var.request_body , ' } }')
+    ngx.log(ngx.WARN, 'In coming request {', header_val, ':', rq_uuid, ',{Body:', ngx.var.request_body , '}}')
     ngx.header['Server'] = 'Unknown'
     ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 end
 
+function _M:access()
+    -- ability to deny the request before it is sent upstream
+end
+
+function _M:content()
+    -- can create content instead of connecting to upstream
+end
+
+function _M:post_action()
+    -- do something after the response was sent to the client
+end
+
 function _M:header_filter()
+    -- can change response headers
     local header_to_keep = self.k_headers
     ngx.log(ngx.DEBUG, 'header to keep = ', header_to_keep)
     local rs_h, err = ngx.resp.get_headers()
@@ -115,15 +133,25 @@ function _M:header_filter()
 end
 
 function _M:body_filter()
-    local resp = ""
+    -- can read and change response body
+    -- https://github.com/openresty/lua-nginx-module/blob/master/README.markdown#body_filter_by_lua
     local header_val = self.t_header
     local rq_uuid = self.t_rquuid
-    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. string.sub(ngx.arg[1], 1, 1000)
+    local resp_body = string.sub(ngx.arg[1], 1, 1000)
+    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
     if ngx.arg[2] then
-        resp = ngx.ctx.buffered
+      ngx.var.resp_body = ngx.ctx.buffered
     end
 
-    ngx.log(ngx.WARN, 'Out going response { ',header_val,' : ', rq_uuid, ', { Body : ', resp , ' } }')
+    ngx.log(ngx.WARN, 'Out going response {',header_val,':', rq_uuid, ',{ Body:', resp_body , '}}')
+end
+
+function _M:log()
+  -- can do extra logging
+end
+
+function _M:balancer()
+  -- use for example require('resty.balancer.round_robin').call to do load balancing
 end
 
 return _M
