@@ -24,8 +24,8 @@ function _M.new(config)
         self.k_headers = headers_keep
     end
 
-    ngx.log(ngx.DEBUG, 'set rquuid to header ', t_header)
-    ngx.log(ngx.DEBUG, 'list to keep headers ', k_headers)
+    ngx.log(ngx.DEBUG, 'set rquuid to header name: ', t_header)
+    ngx.log(ngx.DEBUG, 'list headers to keep: ', k_headers)
 
     return self
 end
@@ -66,11 +66,11 @@ function _M:rewrite()
     if rq_user_key ~= nil then
         ngx.req.clear_header('user_key')
     end
-    if rq_app_id ~= nil and rq_app_key ~= nil then
-        ngx.req.clear_header('app_key')
+    if rq_bearer ~= nil then
+        ngx.req.clear_header('Authorization')
     end
 
-    ngx.log(ngx.WARN, 'In coming request {', header_val, ':', rq_uuid, ',{Body:', ngx.var.request_body , '}}')
+    ngx.log(ngx.WARN, 'In coming request: {',header_val,':',rq_uuid,',{Body:',ngx.var.request_body,'}}')
     ngx.header['Server'] = 'Unknown'
     ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 end
@@ -137,13 +137,12 @@ function _M:body_filter()
     -- https://github.com/openresty/lua-nginx-module/blob/master/README.markdown#body_filter_by_lua
     local header_val = self.t_header
     local rq_uuid = self.t_rquuid
-    local resp_body = string.sub(ngx.arg[1], 1, 1000)
-    ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
-    if ngx.arg[2] then
-      ngx.var.resp_body = ngx.ctx.buffered
-    end
-
-    ngx.log(ngx.WARN, 'Out going response {',header_val,':', rq_uuid, ',{ Body:', resp_body , '}}')
+--     local resp_body = string.sub(ngx.arg[1], 1, 1000)
+--     ngx.ctx.buffered = (ngx.ctx.buffered or "") .. resp_body
+--     if ngx.arg[2] then
+--       resp_body = ngx.ctx.buffered
+--     end
+    ngx.log(ngx.WARN, 'Out going response: {',header_val,':',rq_uuid,',{ Body:',ngx.var.resp_body,'}}')
 end
 
 function _M:log()
