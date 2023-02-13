@@ -9,7 +9,8 @@ local cors_policy_config = cjson.decode([[
     ],
     "allow_methods":[
         "POST"
-    ]
+    ],
+    "allow_credentials": true
 }
 ]])
 

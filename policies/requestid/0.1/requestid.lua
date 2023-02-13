@@ -1,5 +1,7 @@
 --- Gen RQUUID and remove Response Headers policy
-local _M = require('apicast.policy').new('requestid', '0.1')
+
+local policy = require('apicast.policy')
+local _M = policy.new('requestid', '0.1')
 local new = _M.new
 
 local t_header = ''
@@ -9,20 +11,8 @@ local t_rquuid = ''
 function _M.new(config)
     local self = new(config)
 
-    local header_setval = config.to_header
-    local headers_keep = config.keep_headers
-
-    if header_setval == nil then
-        self.t_header = 'breadcrumbId'
-    else
-        self.t_header = header_setval
-    end
-
-    if headers_keep == nil then
-        self.k_headers = 'novalue'
-    else
-        self.k_headers = headers_keep
-    end
+    self.t_header = config.to_header or 'breadcrumbId'
+    self.k_headers = config.keep_headers or 'novalue'
 
     ngx.log(ngx.DEBUG, 'set rquuid to header name: ', t_header)
     ngx.log(ngx.DEBUG, 'list headers to keep: ', k_headers)
@@ -40,8 +30,6 @@ end
 
 function _M:rewrite()
     -- change the request before it reaches upstream
-    local config = configuration or {}
-    local set_header = config.set_header or {}
     local random = math.random
 
     local rq_time = ngx.req.start_time()
@@ -56,11 +44,11 @@ function _M:rewrite()
     self.t_rquuid = rq_uuid
     ngx.log(ngx.DEBUG, 'generated rquuid = ', t_rquuid)
     ngx.req.set_header(header_val, rq_uuid)
-    local rq_app_id = ngx.req.get_headers()['app_id']
+    --local rq_app_id = ngx.req.get_headers()['app_id']
     local rq_app_key = ngx.req.get_headers()['app_key']
     local rq_user_key = ngx.req.get_headers()['user_key']
     local rq_bearer = ngx.req.get_headers()['Authorization']
-    if rq_app_id ~= nil and rq_app_key ~= nil then
+    if rq_app_key ~= nil then
         ngx.req.clear_header('app_key')
     end
     if rq_user_key ~= nil then
@@ -70,7 +58,7 @@ function _M:rewrite()
         ngx.req.clear_header('Authorization')
     end
 
-    ngx.log(ngx.WARN, 'In coming request: {',header_val,':',rq_uuid,',{Body:',ngx.var.request_body,'}}')
+    ngx.log(ngx.WARN, 'In coming request: {"',header_val,'":"',rq_uuid,'","body":"',ngx.var.request_body,'"}')
     ngx.header['Server'] = 'Unknown'
     ngx.header['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 end
@@ -142,7 +130,7 @@ function _M:body_filter()
     if ngx.arg[2] then
         resp_body = ngx.ctx.buffered
     end
-    ngx.log(ngx.WARN, 'Out going response: {',header_val,':',rq_uuid,',{ Body:',ngx.var.resp_body,'}}')
+    ngx.log(ngx.WARN, 'Out going response: {"',header_val,'":"',rq_uuid,'", "body":"',resp_body,'"}')
 end
 
 function _M:log()
