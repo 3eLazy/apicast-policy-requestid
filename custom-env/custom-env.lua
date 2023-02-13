@@ -13,7 +13,7 @@ local cors_policy_config = cjson.decode([[
 }
 ]])
 
-local cache_policy_config = cjson.decode([[
+local caching_policy_config = cjson.decode([[
 {
     "caching_type": "strict"
 }
@@ -21,7 +21,7 @@ local cache_policy_config = cjson.decode([[
 
 policy_chain:insert( PolicyChain.load_policy('requestid', '0.1', '{}'), 1)
 policy_chain:insert( PolicyChain.load_policy('cors', 'builtin', cors_policy_config), 1)
-policy_chain:insert( PolicyChain.load_policy('caching', 'builtin', cache_policy_config), 1)
+policy_chain:insert( PolicyChain.load_policy('caching', 'builtin', caching_policy_config), 1)
 
 return {
   policy_chain = policy_chain,
